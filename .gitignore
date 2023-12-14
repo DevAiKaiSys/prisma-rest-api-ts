@@ -1,5 +1,9 @@
 node_modules
-# Keep environment variables out of version control
+# dotenv environment variable files
 .env
+.env.development
+.env.production
+.env*.local
 
+# build / generate output
 dist

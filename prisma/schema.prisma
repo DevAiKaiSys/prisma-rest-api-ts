@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,21 +7,91 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  posts Post[]
+model category {
+  id             Int            @id @unique(map: "Category_id_key") @default(autoincrement())
+  parentId       Int?
+  childOrder     Int?
+  name           String?        @db.VarChar(255)
+  name2          String?
+  isDefault      Boolean        @default(false)
+  isBrand        Boolean        @default(false)
+  noBarcode      Boolean        @default(false)
+  type           category_type?
+  shopId         Int?
+  category       category?      @relation("categoryTocategory", fields: [parentId], references: [id], onDelete: Cascade, map: "Category_parentId_fkey")
+  other_category category[]     @relation("categoryTocategory")
+  shop           shop?          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  product        product[]
+
+  @@index([shopId], map: "category_shopId_fkey")
+  @@index([parentId], map: "parentId_idx")
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  viewCount Int      @default(0)
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  Int?
+model product {
+  id               Int            @id @unique(map: "Product_id_key") @default(autoincrement())
+  categoryId       Int
+  name             String?        @db.VarChar(255)
+  name2            String?        @db.VarChar(255)
+  isVat            Boolean        @default(true)
+  measurementUnit  String?        @db.VarChar(20)
+  color_attributes String?        @db.VarChar(255)
+  expirationPeriod Int?
+  category         category       @relation(fields: [categoryId], references: [id], onDelete: Cascade, map: "Product_categoryId_fkey")
+  product_unit     product_unit[]
+
+  @@index([categoryId], map: "categoryId_idx")
+}
+
+model product_unit {
+  id             Int      @id @unique(map: "ProductUnit_id_key") @default(autoincrement())
+  productId      Int
+  unitId         Int?
+  multipleFactor Int?
+  baseUnitId     Int?
+  price          Decimal? @db.Decimal(10, 2)
+  cost           Decimal? @db.Decimal(10, 2)
+  barcode        String?  @db.VarChar(255)
+  barcode2       String?  @db.VarChar(255)
+  baseUnit       unit?    @relation("product_unit_baseUnitIdTounit", fields: [baseUnitId], references: [id], map: "ProductUnit_baseUnitId_fkey")
+  product        product  @relation(fields: [productId], references: [id], onDelete: Cascade, map: "ProductUnit_productId_fkey")
+  unit           unit?    @relation("product_unit_unitIdTounit", fields: [unitId], references: [id], map: "ProductUnit_unitId_fkey")
+
+  @@index([baseUnitId], map: "baseUnitId_idx")
+  @@index([productId], map: "productId_idx")
+  @@index([unitId], map: "unitId_idx")
+}
+
+model shop {
+  id        Int         @id @unique(map: "Shop_id_key") @default(autoincrement())
+  name      String
+  category  category[]
+  shop_user shop_user[]
+  unit      unit[]
+}
+
+model shop_user {
+  id       Int    @id @unique(map: "ShopUser_id_key") @default(autoincrement())
+  shopId   Int
+  username String
+  password String
+  name     String
+  shop     shop   @relation(fields: [shopId], references: [id], onDelete: Cascade, map: "ShopUser_shopId_fkey")
+
+  @@index([shopId], map: "ShopUser_shopId_fkey")
+}
+
+model unit {
+  id                                         Int            @id @unique(map: "Unit_id_key") @default(autoincrement())
+  name                                       String         @db.VarChar(255)
+  shopId                                     Int
+  product_unit_product_unit_baseUnitIdTounit product_unit[] @relation("product_unit_baseUnitIdTounit")
+  product_unit_product_unit_unitIdTounit     product_unit[] @relation("product_unit_unitIdTounit")
+  shop                                       shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId], map: "unit_shopId_fkey")
+}
+
+enum category_type {
+  MAIN_GROUP
+  SUB_GROUP
 }

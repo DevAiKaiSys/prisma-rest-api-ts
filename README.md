@@ -5,12 +5,13 @@
 ```
 npm init -y
 npm install express
+npm install cors
 ```
 
 # [Prisma](https://www.prisma.io/docs/getting-started/quickstart)
 
 ```
-npm install typescript ts-node @types/node @types/express --save-dev
+npm install typescript ts-node @types/node @types/express @types/cors --save-dev
 ```
 
 ## Initialize
@@ -51,6 +52,7 @@ npx prisma migrate dev
 # Start the REST API server
 
 ```json
+// package.json
 "scripts": {
     "dev": "ts-node src/index.ts"
   },
@@ -71,6 +73,7 @@ npx prisma migrate deploy
 ## Start the REST API server Plesk
 
 ```json
+// package.json
 "scripts": {
     "start": "NODE_ENV=production node dist/src/index.js",
     "build": "tsc"
