@@ -8,27 +8,96 @@ datasource db {
 }
 
 model category {
-  id             Int            @id @unique(map: "Category_id_key") @default(autoincrement())
-  parentId       Int?
-  childOrder     Int?
-  name           String?        @db.VarChar(255)
-  name2          String?
-  isDefault      Boolean        @default(false)
-  isBrand        Boolean        @default(false)
-  noBarcode      Boolean        @default(false)
-  type           category_type?
-  shopId         Int?
-  category       category?      @relation("categoryTocategory", fields: [parentId], references: [id], onDelete: Cascade, map: "Category_parentId_fkey")
-  other_category category[]     @relation("categoryTocategory")
-  shop           shop?          @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  product        product[]
+  id         Int            @id @unique @default(autoincrement())
+  parentId   Int?
+  childOrder Int?
+  name       String?        @db.VarChar(255)
+  name2      String?
+  isDefault  Boolean        @default(false)
+  isBrand    Boolean        @default(false)
+  noBarcode  Boolean        @default(false)
+  type       category_type?
+  shopId     Int?
+  parent     category?      @relation("categoryTocategory", fields: [parentId], references: [id], onDelete: Cascade)
+  children   category[]     @relation("categoryTocategory")
+  shop       shop?          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  product    product[]
 
-  @@index([shopId], map: "category_shopId_fkey")
-  @@index([parentId], map: "parentId_idx")
+  @@index([parentId])
+  @@index([shopId])
+}
+
+model customer {
+  id          Int       @id @unique @default(autoincrement())
+  shopId      Int
+  firstName   String
+  lastName    String
+  email       String    @unique
+  phoneNumber String?
+  address     String?
+  // createdAt   DateTime  @default(now()) // UTC
+  // updatedAt   DateTime  @updatedAt //UTC
+  createdAt   DateTime
+  updatedAt   DateTime
+  shop        shop      @relation(fields: [shopId], references: [id])
+  invoice     invoice[]
+
+  @@index([email])
+  @@index([shopId])
+}
+
+model invoice {
+  id            Int            @id @unique @default(autoincrement())
+  shopId        Int
+  sellerId      Int?
+  invoiceNumber String         @unique
+  // issuedAt      DateTime       @default(now()) //UTC
+  issuedAt      DateTime
+  dueDate       DateTime?
+  totalAmount   Decimal        @db.Decimal(10, 2)
+  isPaid        Boolean        @default(false)
+  customerId    Int?
+  customer      customer?      @relation(fields: [customerId], references: [id])
+  shop_user     shop_user?     @relation(fields: [sellerId], references: [id])
+  shop          shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  invoice_item  invoice_item[]
+  payment       payment[]
+
+  @@index([customerId])
+  @@index([sellerId])
+  @@index([shopId])
+}
+
+model invoice_item {
+  id        Int      @id @unique @default(autoincrement())
+  invoiceId Int
+  barcode   String?
+  name      String
+  unit      String
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2)
+  discount  Decimal? @db.Decimal(10, 2)
+  total     Decimal  @db.Decimal(10, 2)
+  invoice   invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model payment {
+  id           Int       @id @unique @default(autoincrement())
+  invoiceId    Int
+  cash         Decimal?  @db.Decimal(10, 2)
+  otherMethods Decimal?  @db.Decimal(10, 2)
+  change       Decimal?  @db.Decimal(10, 2)
+  remaining    Decimal?  @db.Decimal(10, 2)
+  paymentDate  DateTime?
+  invoice      invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
 }
 
 model product {
-  id               Int            @id @unique(map: "Product_id_key") @default(autoincrement())
+  id               Int            @id @unique @default(autoincrement())
   categoryId       Int
   name             String?        @db.VarChar(255)
   name2            String?        @db.VarChar(255)
@@ -36,14 +105,14 @@ model product {
   measurementUnit  String?        @db.VarChar(20)
   color_attributes String?        @db.VarChar(255)
   expirationPeriod Int?
-  category         category       @relation(fields: [categoryId], references: [id], onDelete: Cascade, map: "Product_categoryId_fkey")
+  category         category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   product_unit     product_unit[]
 
-  @@index([categoryId], map: "categoryId_idx")
+  @@index([categoryId])
 }
 
 model product_unit {
-  id             Int      @id @unique(map: "ProductUnit_id_key") @default(autoincrement())
+  id             Int      @id @unique @default(autoincrement())
   productId      Int
   unitId         Int?
   multipleFactor Int?
@@ -52,43 +121,50 @@ model product_unit {
   cost           Decimal? @db.Decimal(10, 2)
   barcode        String?  @db.VarChar(255)
   barcode2       String?  @db.VarChar(255)
-  baseUnit       unit?    @relation("product_unit_baseUnitIdTounit", fields: [baseUnitId], references: [id], map: "ProductUnit_baseUnitId_fkey")
-  product        product  @relation(fields: [productId], references: [id], onDelete: Cascade, map: "ProductUnit_productId_fkey")
-  unit           unit?    @relation("product_unit_unitIdTounit", fields: [unitId], references: [id], map: "ProductUnit_unitId_fkey")
+  // createdAt      DateTime @default(now()) //UTC
+  // updatedAt      DateTime @updatedAt //UTC
+  createdAt      DateTime
+  updatedAt      DateTime
+  baseUnit       unit?    @relation("product_unit_baseUnitIdTounit", fields: [baseUnitId], references: [id])
+  product        product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  unit           unit?    @relation("product_unit_unitIdTounit", fields: [unitId], references: [id])
 
-  @@index([baseUnitId], map: "baseUnitId_idx")
-  @@index([productId], map: "productId_idx")
-  @@index([unitId], map: "unitId_idx")
+  @@index([baseUnitId])
+  @@index([productId])
+  @@index([unitId])
 }
 
 model shop {
-  id        Int         @id @unique(map: "Shop_id_key") @default(autoincrement())
+  id        Int         @id @unique @default(autoincrement())
   name      String
   category  category[]
+  customer  customer[]
+  invoice   invoice[]
   shop_user shop_user[]
   unit      unit[]
 }
 
 model shop_user {
-  id       Int    @id @unique(map: "ShopUser_id_key") @default(autoincrement())
+  id       Int       @id @unique @default(autoincrement())
   shopId   Int
   username String
   password String
   name     String
-  shop     shop   @relation(fields: [shopId], references: [id], onDelete: Cascade, map: "ShopUser_shopId_fkey")
+  invoice  invoice[]
+  shop     shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
-  @@index([shopId], map: "ShopUser_shopId_fkey")
+  @@index([shopId])
 }
 
 model unit {
-  id                                         Int            @id @unique(map: "Unit_id_key") @default(autoincrement())
+  id                                         Int            @id @unique @default(autoincrement())
   name                                       String         @db.VarChar(255)
   shopId                                     Int
   product_unit_product_unit_baseUnitIdTounit product_unit[] @relation("product_unit_baseUnitIdTounit")
   product_unit_product_unit_unitIdTounit     product_unit[] @relation("product_unit_unitIdTounit")
   shop                                       shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
-  @@index([shopId], map: "unit_shopId_fkey")
+  @@index([shopId])
 }
 
 enum category_type {

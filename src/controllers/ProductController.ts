@@ -1,7 +1,10 @@
-import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
+import prisma from "../config/database";
+import { getCurrentDatePrisma } from "../utils/dateUtils";
+import { ChildProcess } from "child_process";
 
 class ProductController {
   async getAllProducts(req: Request, res: Response): Promise<void> {
@@ -9,8 +12,8 @@ class ProductController {
       const products = await prisma.product.findMany();
       res.status(200).json(products);
     } catch (error) {
-      console.error('Error fetching products:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error fetching products:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 
@@ -33,11 +36,11 @@ class ProductController {
       if (product) {
         res.status(200).json(product);
       } else {
-        res.status(404).json({ error: 'Product not found' });
+        res.status(404).json({ error: "Product not found" });
       }
     } catch (error) {
-      console.error('Error fetching product by ID:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error fetching product by ID:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 
@@ -62,14 +65,14 @@ class ProductController {
       });
 
       if (!product) {
-        res.status(404).json({ error: 'Product not found' });
+        res.status(404).json({ error: "Product not found" });
         return;
       }
 
       res.status(200).json(product.product);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 
@@ -99,11 +102,11 @@ class ProductController {
       const resultArray = products.map((product) => {
         const measurementUnit = product.measurementUnit
           ? ` ${product.measurementUnit}`
-          : '';
+          : "";
         // const productUnit_id = product.product_unit?.[0]?.id ?? null;
         const unitName = product.product_unit?.[0]?.unit?.name
           ? ` {${product.product_unit[0].unit.name}}`
-          : '';
+          : "";
 
         return {
           id: product.id,
@@ -114,7 +117,7 @@ class ProductController {
       res.json(resultArray);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 
@@ -126,14 +129,14 @@ class ProductController {
       if (!unitId) {
         // Check if default unit "Psc" exists
         const defaultUnit = await prisma.unit.findFirst({
-          where: { name: 'Psc', shopId: 1 },
+          where: { name: "Psc", shopId: 1 },
         });
 
         // If default unit "Psc" doesn't exist, create it
         if (!defaultUnit) {
           const newDefaultUnit = await prisma.unit.create({
             data: {
-              name: 'Psc',
+              name: "Psc",
               shopId: 1,
             },
           });
@@ -147,7 +150,15 @@ class ProductController {
       const productData = {
         categoryId: 1,
         product_unit: {
-          create: [{ barcode, price, unitId }],
+          create: [
+            {
+              barcode,
+              price,
+              unitId,
+              createdAt: getCurrentDatePrisma(),
+              updatedAt: getCurrentDatePrisma(),
+            },
+          ],
         },
       };
 
@@ -165,8 +176,8 @@ class ProductController {
 
       res.status(201).json(newProduct);
     } catch (error) {
-      console.error('Error creating product:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error creating product:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 
@@ -190,8 +201,8 @@ class ProductController {
 
       res.status(200).json(updatedProduct);
     } catch (error) {
-      console.error('Error updating product:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error updating product:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 
@@ -205,8 +216,8 @@ class ProductController {
 
       res.status(204).send();
     } catch (error) {
-      console.error('Error deleting product:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error deleting product:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 }
