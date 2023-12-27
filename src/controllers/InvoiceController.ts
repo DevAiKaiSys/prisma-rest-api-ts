@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
 import { Prisma, PrismaClient } from "@prisma/client";
 
-// const prisma = new PrismaClient();
-import prisma from "../config/database";
-import { getCurrentDatePrisma } from "../utils/dateUtils";
+const prisma = new PrismaClient();
+// import prisma from "../config/database";
 
 class InvoiceController {
   async getAllInvoices(req: Request, res: Response): Promise<void> {
@@ -31,6 +30,10 @@ class InvoiceController {
     const date_start = new Date(date);
     const date_end = new Date(date);
     date_end.setDate(date_end.getDate() + 1);
+
+    // offset according TIMEZONE
+    date_start.setHours(date_start.getHours() - 7);
+    date_end.setHours(date_end.getHours() - 7);
 
     try {
       const invoices = await prisma.invoice.findMany({
@@ -107,7 +110,7 @@ class InvoiceController {
           shopId,
           isPaid: true,
           invoiceNumber,
-          issuedAt: getCurrentDatePrisma(),
+          // issuedAt: getCurrentDatePrisma(),
           invoice_item: {
             createMany: {
               data: invoice_items.map((item: any) => ({

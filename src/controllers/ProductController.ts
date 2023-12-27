@@ -1,10 +1,8 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
-// const prisma = new PrismaClient();
-import prisma from "../config/database";
-import { getCurrentDatePrisma } from "../utils/dateUtils";
-import { ChildProcess } from "child_process";
+const prisma = new PrismaClient();
+// import prisma from "../config/database";
 
 class ProductController {
   async getAllProducts(req: Request, res: Response): Promise<void> {
@@ -155,8 +153,8 @@ class ProductController {
               barcode,
               price,
               unitId,
-              createdAt: getCurrentDatePrisma(),
-              updatedAt: getCurrentDatePrisma(),
+              // createdAt: getCurrentDatePrisma(),
+              // updatedAt: getCurrentDatePrisma(),
             },
           ],
         },

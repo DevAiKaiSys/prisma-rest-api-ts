@@ -35,10 +35,10 @@ model customer {
   email       String    @unique
   phoneNumber String?
   address     String?
-  // createdAt   DateTime  @default(now()) // UTC
-  // updatedAt   DateTime  @updatedAt //UTC
-  createdAt   DateTime
-  updatedAt   DateTime
+  createdAt   DateTime  @default(now()) // UTC
+  updatedAt   DateTime  @updatedAt //UTC
+  // createdAt   DateTime
+  // updatedAt   DateTime
   shop        shop      @relation(fields: [shopId], references: [id])
   invoice     invoice[]
 
@@ -51,8 +51,8 @@ model invoice {
   shopId        Int
   sellerId      Int?
   invoiceNumber String         @unique
-  // issuedAt      DateTime       @default(now()) //UTC
-  issuedAt      DateTime
+  issuedAt      DateTime       @default(now()) //UTC
+  // issuedAt      DateTime
   dueDate       DateTime?
   totalAmount   Decimal        @db.Decimal(10, 2)
   isPaid        Boolean        @default(false)
@@ -121,10 +121,10 @@ model product_unit {
   cost           Decimal? @db.Decimal(10, 2)
   barcode        String?  @db.VarChar(255)
   barcode2       String?  @db.VarChar(255)
-  // createdAt      DateTime @default(now()) //UTC
-  // updatedAt      DateTime @updatedAt //UTC
-  createdAt      DateTime
-  updatedAt      DateTime
+  createdAt      DateTime @default(now()) //UTC
+  updatedAt      DateTime @updatedAt //UTC
+  // createdAt      DateTime
+  // updatedAt      DateTime
   baseUnit       unit?    @relation("product_unit_baseUnitIdTounit", fields: [baseUnitId], references: [id])
   product        product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   unit           unit?    @relation("product_unit_unitIdTounit", fields: [unitId], references: [id])

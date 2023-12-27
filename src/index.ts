@@ -4,7 +4,6 @@ import cors from "cors";
 import productRoutes from "./routes/productRoutes"; // Import your product routes or any other routes
 import invoiceRoutes from "./routes/invoiceRoutes";
 import prisma from "./config/database";
-import { getCurrentDatePrisma } from "./utils/dateUtils";
 
 dotenv.config();
 
