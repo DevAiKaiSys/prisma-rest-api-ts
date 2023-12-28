@@ -7,3 +7,6 @@ node_modules
 
 # build / generate output
 dist
+
+# prisma
+prisma/migrations

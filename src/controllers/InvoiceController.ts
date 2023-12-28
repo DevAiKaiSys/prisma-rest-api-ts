@@ -48,6 +48,10 @@ class InvoiceController {
             issuedAt: "desc",
           },
         ],
+        include: {
+          invoice_item: true,
+          payment: true,
+        },
       });
 
       res.status(200).json(invoices);
