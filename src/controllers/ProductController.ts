@@ -42,6 +42,38 @@ class ProductController {
     }
   }
 
+  async getProductByProductUnitId(req: Request, res: Response): Promise<void> {
+    const productUnitId = parseInt(req.params.id, 10);
+
+    try {
+      const product_unit = await prisma.product_unit.findUnique({
+        where: {
+          id: productUnitId,
+        },
+        include: {
+          product: {
+            include: {
+              product_unit: {
+                include: {
+                  unit: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (product_unit) {
+        res.status(200).json(product_unit);
+      } else {
+        res.status(404).json({ error: "Product not found" });
+      }
+    } catch (error) {
+      console.error("Error fetching product by ID:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
   async getProductByBarcode(req: Request, res: Response): Promise<void> {
     const barcode = req.params.barcode;
 
@@ -198,6 +230,40 @@ class ProductController {
       });
 
       res.status(200).json(updatedProduct);
+    } catch (error) {
+      console.error("Error updating product:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async updateProductUnit(req: Request, res: Response): Promise<void> {
+    const productUnitId = parseInt(req.params.id, 10);
+    const { name, name2, price } = req.body;
+
+    try {
+      const updatedProductUnit = await prisma.product_unit.update({
+        where: { id: productUnitId },
+        data: {
+          price,
+          product: {
+            update: { name, name2 },
+          },
+        },
+        include: {
+          product: {
+            include: {
+              product_unit: {
+                include: {
+                  unit: true,
+                },
+              },
+              category: true,
+            },
+          },
+        },
+      });
+
+      res.status(200).json(updatedProductUnit.product);
     } catch (error) {
       console.error("Error updating product:", error);
       res.status(500).json({ error: "Internal Server Error" });
