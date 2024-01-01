@@ -130,9 +130,7 @@ class ProductController {
       //   return `${product.name}${measurementUnit}${unitName}`;
       // });
       const resultArray = products.map((product) => {
-        const measurementUnit = product.measurementUnit
-          ? ` ${product.measurementUnit}`
-          : "";
+        const measurementUnit = product.volume ? ` ${product.volume}` : "";
         // const productUnit_id = product.product_unit?.[0]?.id ?? null;
         const unitName = product.product_unit?.[0]?.unit?.name
           ? ` {${product.product_unit[0].unit.name}}`
@@ -140,7 +138,11 @@ class ProductController {
 
         return {
           id: product.id,
-          productName: `${product.name}${measurementUnit}${unitName}`,
+          // productName: `${product.name}${measurementUnit}${unitName}`,
+          productNames: [
+            product.name && `${product.name}${measurementUnit}${unitName}`,
+            product.name2 && `${product.name2}${measurementUnit}${unitName}`,
+          ].filter(Boolean),
         };
       });
 

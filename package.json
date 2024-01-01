@@ -8,7 +8,8 @@
     "dev": "npx dotenv -e .env.development -- ts-node src/index.ts",
     "start": "NODE_ENV=production node dist/src/index.js",
     "build": "tsc",
-    "nodemon": "npx dotenv -e .env.development -- nodemon src/index.ts"
+    "nodemon": "npx dotenv -e .env.development -- nodemon src/index.ts",
+    "migrate": "npx dotenv -e .env.development -- prisma migrate dev —-create-only"
   },
   "keywords": [],
   "author": "",

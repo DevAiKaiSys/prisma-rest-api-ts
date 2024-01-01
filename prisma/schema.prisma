@@ -76,6 +76,7 @@ model invoice_item {
   unit      String
   quantity  Int
   price     Decimal  @db.Decimal(10, 2)
+  cost      Decimal? @db.Decimal(10, 2)
   discount  Decimal? @db.Decimal(10, 2)
   total     Decimal  @db.Decimal(10, 2)
   invoice   invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
@@ -102,7 +103,7 @@ model product {
   name             String?        @db.VarChar(255)
   name2            String?        @db.VarChar(255)
   isVat            Boolean        @default(true)
-  measurementUnit  String?        @db.VarChar(20)
+  volume           String?        @db.VarChar(20)
   color_attributes String?        @db.VarChar(255)
   expirationPeriod Int?
   category         category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
