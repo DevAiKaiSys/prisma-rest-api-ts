@@ -104,7 +104,8 @@ model product {
   name2            String?        @db.VarChar(255)
   isVat            Boolean        @default(true)
   volume           String?        @db.VarChar(20)
-  color_attributes String?        @db.VarChar(255)
+  // color_attributes String?        @db.VarChar(255)
+  color_appearance String?        @db.VarChar(255)
   expirationPeriod Int?
   category         category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   product_unit     product_unit[]
@@ -118,8 +119,8 @@ model product_unit {
   unitId         Int?
   multipleFactor Int?
   baseUnitId     Int?
-  price          Decimal? @db.Decimal(10, 2)
   cost           Decimal? @db.Decimal(10, 2)
+  price          Decimal? @db.Decimal(10, 2)
   barcode        String?  @db.VarChar(255)
   barcode2       String?  @db.VarChar(255)
   createdAt      DateTime @default(now()) //UTC

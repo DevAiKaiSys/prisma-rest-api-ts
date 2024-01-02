@@ -129,21 +129,63 @@ class ProductController {
 
       //   return `${product.name}${measurementUnit}${unitName}`;
       // });
-      const resultArray = products.map((product) => {
-        const measurementUnit = product.volume ? ` ${product.volume}` : "";
-        // const productUnit_id = product.product_unit?.[0]?.id ?? null;
+      // const resultArray = products.map((product) => {
+      //   const measurementUnit = product.volume ? ` ${product.volume}` : "";
+      //   // const productUnit_id = product.product_unit?.[0]?.id ?? null;
+      //   const unitName = product.product_unit?.[0]?.unit?.name
+      //     ? ` {${product.product_unit[0].unit.name}}`
+      //     : "";
+
+      //   return {
+      //     id: product.id,
+      //     productName: `${product.name}${measurementUnit}${unitName}`,
+      //     // productNames: [
+      //     //   product.name && `${product.name}${measurementUnit}${unitName}`,
+      //     //   product.name2 && `${product.name2}${measurementUnit}${unitName}`,
+      //     // ].filter(Boolean),
+      //   };
+      //   // const array1 = {
+      //   //   id: product.id,
+      //   //   ...(product.name && {
+      //   //     productNames: `${product.name}${measurementUnit}${unitName}`,
+      //   //   }),
+      //   // };
+
+      //   // const array2 = {
+      //   //   id: product.id,
+      //   //   ...(product.name2 && {
+      //   //     productNames: `${product.name2}${measurementUnit}${unitName}`,
+      //   //   }),
+      //   // };
+
+      //   // return [array1, array2];
+      // });
+
+      // console.log(resultArray);
+
+      const resultArray = products.flatMap((product) => {
+        const volume = product.volume ? ` ${product.volume}` : "";
         const unitName = product.product_unit?.[0]?.unit?.name
           ? ` {${product.product_unit[0].unit.name}}`
           : "";
 
-        return {
-          id: product.id,
-          // productName: `${product.name}${measurementUnit}${unitName}`,
-          productNames: [
-            product.name && `${product.name}${measurementUnit}${unitName}`,
-            product.name2 && `${product.name2}${measurementUnit}${unitName}`,
-          ].filter(Boolean),
-        };
+        const objects = [];
+
+        if (product.name) {
+          objects.push({
+            id: product.id,
+            productName: `${product.name}${volume}${unitName}`,
+          });
+        }
+
+        if (product.name2) {
+          objects.push({
+            id: product.id,
+            productName: `${product.name2}${volume}${unitName}`,
+          });
+        }
+
+        return objects;
       });
 
       res.json(resultArray);
@@ -240,15 +282,16 @@ class ProductController {
 
   async updateProductUnit(req: Request, res: Response): Promise<void> {
     const productUnitId = parseInt(req.params.id, 10);
-    const { name, name2, price } = req.body;
+    const { name, name2, volume, color_appearance, cost, price } = req.body;
 
     try {
       const updatedProductUnit = await prisma.product_unit.update({
         where: { id: productUnitId },
         data: {
+          cost,
           price,
           product: {
-            update: { name, name2 },
+            update: { name, name2, volume, color_appearance },
           },
         },
         include: {
