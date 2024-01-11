@@ -1,13 +1,22 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-// import prisma from "../config/database";
+// const prisma = new PrismaClient();
+import prisma from "../config/database";
 
 class ProductController {
   async getAllProducts(req: Request, res: Response): Promise<void> {
     try {
-      const products = await prisma.product.findMany();
+      const products = await prisma.product.findMany({
+        // where: { shopId: 1 },
+        include: {
+          product_unit: {
+            include: {
+              unit: true,
+            },
+          },
+        },
+      });
       res.status(200).json(products);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -25,6 +34,7 @@ class ProductController {
           product_unit: {
             include: {
               unit: true,
+              baseUnit: true,
             },
           },
           category: true,
@@ -201,16 +211,16 @@ class ProductController {
 
     try {
       if (!unitId) {
-        // Check if default unit "Psc" exists
+        // Check if default unit "ชิ้น" exists
         const defaultUnit = await prisma.unit.findFirst({
-          where: { name: "Psc", shopId: 1 },
+          where: { name: "ชิ้น", shopId: 1 },
         });
 
-        // If default unit "Psc" doesn't exist, create it
+        // If default unit "ชิ้น" doesn't exist, create it
         if (!defaultUnit) {
           const newDefaultUnit = await prisma.unit.create({
             data: {
-              name: "Psc",
+              name: "ชิ้น",
               shopId: 1,
             },
           });
