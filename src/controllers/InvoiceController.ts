@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import PrismaDevClient from "../config/database";
 
-const prisma = new PrismaClient();
-// import prisma from "../config/database";
+const prisma: PrismaClient =
+  process.env.NODE_ENV === "production" ? new PrismaClient() : PrismaDevClient;
 
 class InvoiceController {
   async getAllInvoices(req: Request, res: Response): Promise<void> {

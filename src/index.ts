@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import productRoutes from "./routes/productRoutes"; // Import your product routes or any other routes
 import invoiceRoutes from "./routes/invoiceRoutes";
+import categoriesRoutes from "./routes/categoryRoutes";
 import prisma from "./config/database";
 
 dotenv.config();
@@ -17,6 +18,7 @@ app.use(express.json());
 // Routes
 app.use("/api/products", productRoutes); // Use your product routes or any other routes
 app.use("/api/invoices", invoiceRoutes);
+app.use("/api/categories", categoriesRoutes);
 
 // tester
 app.get("/", (req, res) => {
